@@ -24,7 +24,7 @@ public class StudyService {
     public Study createNewStudy(Long memberId, Study study) {
         Optional<Member> member = memberService.findById(memberId);
         if (member.isPresent()) {
-//            study.setOwnerId(memberId);
+            study.setOwnerId(memberId);
         } else {
             throw new IllegalArgumentException("Member doesn't exist for id: '" + memberId + "'");
         }

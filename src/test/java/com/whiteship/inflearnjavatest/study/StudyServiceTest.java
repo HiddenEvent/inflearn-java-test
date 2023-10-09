@@ -26,22 +26,17 @@ class StudyServiceTest {
         Member member = new Member();
         member.setId(1L);
         member.setEmail("a@a.com");
-        when(memberService.findById(any()))
-                .thenReturn(Optional.of(member)) // 1번째 호출
-                .thenThrow(new RuntimeException()) // 2번째 호출
-                .thenReturn(Optional.empty()); // 3번째 호출
-        Optional<Member> byId = memberService.findById(1L);
-        // 1번째 호출
-        assertEquals("a@a.com", byId.get().getEmail());
-        // 2번째 호출
-        assertThrows(RuntimeException.class, () -> {
-            memberService.findById(1L);
-        });
-        // 3번째 호출
-        assertEquals(Optional.empty(), memberService.findById(1L));
+        // 아래 코드는 MemberService의 findById 메소드가 호출될 때 member를 리턴해라는 stubbing
+        when(memberService.findById(1L)).thenReturn(Optional.of(member));
 
-//        Study study = new Study(10, "java");
-//        when(studyRepository.save(any())).thenReturn(study);
+        // 아래 코드는 StudyRepository의 save 메소드가 호출될 때 study를 리턴해라는 stubbing
+        Study study = new Study(10, "java");
+        when(studyRepository.save(any())).thenReturn(study);
+
+        // StudyService createNewStudy 테스트 코드
+        StudyService studyService = new StudyService(memberService, studyRepository);
+        studyService.createNewStudy(1L, study);
+        assertEquals(member.getId(), study.getOwnerId());
 
 
     }
