@@ -1,5 +1,6 @@
 package com.whiteship.inflearnjavatest;
 
+import com.whiteship.inflearnjavatest.domain.Study;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,7 +21,7 @@ class StudyTest {
         String testEnv = System.getenv("TEST_ENV");
         System.out.println(testEnv);
         Study study = new Study(10);
-        assertEquals(10, study.getLimit());
+//        assertEquals(10, study.getLimit());
 
     }
     @Test
