@@ -1,26 +1,19 @@
 package com.whiteship.inflearnjavatest;
 
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.condition.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.time.Duration;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
-import static org.junit.jupiter.api.Assumptions.assumingThat;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+@ExtendWith(FindSlowTestExtension.class)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS) // 클래스마다 인스턴스 공유
 class StudyTest {
     int value = 1;
 
     @FastTest
-    @DisplayName("스터디 만들기")
+    @DisplayName("Fast 스터디 만들기")
     void create() {
         System.out.println(this);
         System.out.println(value++);
@@ -30,8 +23,10 @@ class StudyTest {
         assertEquals(10, study.getLimit());
 
     }
-    @SlowTest
-    void create1() {
+    @Test
+    @DisplayName("Slow 스터디 만들기")
+    void create1() throws InterruptedException {
+        Thread.sleep(1005L);
         System.out.println(this);
         System.out.println(value++);
         System.out.println("create1");
@@ -52,17 +47,20 @@ class StudyTest {
     void parameterizedTest(String message){
         // ValueSource 개수 만큼 테스트가 동작한다.
         System.out.println(message);
+        // 테스트용 코드 아무거나 만들어줘
+        System.out.println(this);
+
     }
 
 
 
     @BeforeAll
-    void beforeAll() {
+    static void beforeAll() {
         System.out.println("beforeAll");
     }
 
     @AfterAll
-    void afterAll() {
+    static void afterAll() {
         System.out.println("afterAll");
     }
 
