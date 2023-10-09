@@ -5,6 +5,8 @@ import org.junit.jupiter.api.*;
 import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumingThat;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class StudyTest {
@@ -12,19 +14,20 @@ class StudyTest {
     @Test
     @DisplayName("스터디 만들기")
     void create() {
-        assertAll(
-                // assertTimeout : 타임아웃 테스트 시 시간이 넘어가도 끝날때 까지 기다림
-                () -> assertTimeout(Duration.ofMillis(100), () -> {
-                    new Study(10);
-                    Thread.sleep(300);
-                }),
-                
-                // assertTimeoutPreemptively : 타임아웃 테스트 시 시간이 넘어가면 즉시 종료
-                () -> assertTimeoutPreemptively(Duration.ofMillis(100), () -> {
-                    new Study(10);
-                    Thread.sleep(300);
-                })
-        );
+        String testEnv = System.getenv("TEST_ENV");
+        System.out.println(testEnv);
+        // LOCAL profile 일 경우만  하위 모든 테스트 코드 실행
+        assumeTrue("LOCAL".equalsIgnoreCase(testEnv));
+
+        // LOCAL profile 일 경우  아래 테스트 코드 실행
+        assumingThat("LOCAL".equalsIgnoreCase(testEnv), () -> {
+            // 테스트 코드
+        });
+        // LOCAL profile 일 경우  아래 테스트 코드 실행
+        assumingThat("STG".equalsIgnoreCase(testEnv), () -> {
+            // 테스트 코드
+        });
+
     }
 
     @Test
