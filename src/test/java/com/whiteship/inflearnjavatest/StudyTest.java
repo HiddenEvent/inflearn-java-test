@@ -3,6 +3,9 @@ package com.whiteship.inflearnjavatest;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.*;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EmptySource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.Duration;
@@ -37,7 +40,8 @@ class StudyTest {
     @DisplayName("반복 테스트 (동적 데이터)")
     @ParameterizedTest(name = "{index} {displayName} message 입력 :{0}")
     @ValueSource(strings = {"테스트를", "동적으로", "추가하여", "테스트."})
-    void repeatTest(String message){
+    @NullAndEmptySource // null과 empty 추가로 테스트해준다.
+    void parameterizedTest(String message){
         // ValueSource 개수 만큼 테스트가 동작한다.
         System.out.println(message);
     }

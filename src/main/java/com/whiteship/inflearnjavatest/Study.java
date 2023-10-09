@@ -3,6 +3,8 @@ package com.whiteship.inflearnjavatest;
 public class Study {
     private StudyStatus status;
     private int limit;
+    private String name;
+
 
     public Study(int limit) {
         if (limit < 0) {
@@ -19,11 +21,28 @@ public class Study {
         this.limit = limit;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public StudyStatus getStatus() {
         return status;
     }
 
     public void setStatus(StudyStatus status) {
         this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "Study{" +
+                "status=" + status +
+                ", limit=" + limit +
+                ", name='" + name + '\'' +
+                '}';
     }
 }
