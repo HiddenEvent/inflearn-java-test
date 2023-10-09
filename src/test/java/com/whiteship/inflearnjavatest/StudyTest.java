@@ -1,10 +1,7 @@
 package com.whiteship.inflearnjavatest;
 
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.condition.EnabledOnJre;
-import org.junit.jupiter.api.condition.EnabledOnOs;
-import org.junit.jupiter.api.condition.JRE;
-import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.condition.*;
 
 import java.time.Duration;
 
@@ -17,12 +14,13 @@ class StudyTest {
 
     @Test
     @DisplayName("스터디 만들기")
-    @EnabledOnJre({JRE.JAVA_8,JRE.JAVA_9, JRE.JAVA_10, JRE.JAVA_17 })
+    @EnabledIfEnvironmentVariable(named = "TEST_ENV", matches = "LOCAL")
     void create() {
         String testEnv = System.getenv("TEST_ENV");
         System.out.println(testEnv);
-        // LOCAL profile 일 경우만  하위 모든 테스트 코드 실행
-        assumeTrue("LOCAL".equalsIgnoreCase(testEnv));
+        Study study = new Study(10);
+        assertEquals(10, study.getLimit());
+
     }
 
     @Test
