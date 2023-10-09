@@ -15,11 +15,15 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.junit.jupiter.api.Assumptions.assumingThat;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS) // 클래스마다 인스턴스 공유
 class StudyTest {
+    int value = 1;
 
     @FastTest
     @DisplayName("스터디 만들기")
     void create() {
+        System.out.println(this);
+        System.out.println(value++);
         String testEnv = System.getenv("TEST_ENV");
         System.out.println(testEnv);
         Study study = new Study(10);
@@ -28,11 +32,15 @@ class StudyTest {
     }
     @SlowTest
     void create1() {
+        System.out.println(this);
+        System.out.println(value++);
         System.out.println("create1");
     }
     @DisplayName("반복 테스트")
     @RepeatedTest(value = 10, name = "{displayName}, {currentRepetition}/{totalRepetitions}")
     void repeatTest(RepetitionInfo repetitionInfo){
+        System.out.println(this);
+        System.out.println(value++);
         System.out.println("test " + repetitionInfo.getCurrentRepetition() + " / " +
                 repetitionInfo.getTotalRepetitions());
     }
@@ -49,12 +57,12 @@ class StudyTest {
 
 
     @BeforeAll
-    static void beforeAll() {
+    void beforeAll() {
         System.out.println("beforeAll");
     }
 
     @AfterAll
-    static void afterAll() {
+    void afterAll() {
         System.out.println("afterAll");
     }
 
