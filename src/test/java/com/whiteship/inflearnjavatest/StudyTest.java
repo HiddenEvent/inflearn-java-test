@@ -1,7 +1,9 @@
 package com.whiteship.inflearnjavatest;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.EnabledOnJre;
 import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.JRE;
 import org.junit.jupiter.api.condition.OS;
 
 import java.time.Duration;
@@ -15,7 +17,7 @@ class StudyTest {
 
     @Test
     @DisplayName("스터디 만들기")
-    @EnabledOnOs({OS.MAC, OS.LINUX})
+    @EnabledOnJre({JRE.JAVA_8,JRE.JAVA_9, JRE.JAVA_10, JRE.JAVA_17 })
     void create() {
         String testEnv = System.getenv("TEST_ENV");
         System.out.println(testEnv);
@@ -24,7 +26,7 @@ class StudyTest {
     }
 
     @Test
-    @EnabledOnOs({OS.WINDOWS})
+    @EnabledOnJre({JRE.OTHER })
     void create1() {
         System.out.println("create1");
     }
