@@ -12,8 +12,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class StudyServiceTest {
@@ -23,6 +22,7 @@ class StudyServiceTest {
     @Test
     void createNewStudy(@Mock MemberService memberService,
                         @Mock StudyRepository studyRepository) {
+
         Member member = new Member();
         member.setId(1L);
         member.setEmail("a@a.com");
@@ -37,6 +37,11 @@ class StudyServiceTest {
         StudyService studyService = new StudyService(memberService, studyRepository);
         studyService.createNewStudy(1L, study);
         assertEquals(member.getId(), study.getOwnerId());
+
+        // memberService의 notify 메소드가 1번 호출되었는지 검증
+        verify(memberService, times(1)).notify(study);
+        // memberService의 validate 메소드가 한번도 호출되지 않았는지 검증
+        verify(memberService, never()).validate(any());
 
 
     }
