@@ -12,6 +12,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -22,27 +24,30 @@ class StudyServiceTest {
     @Test
     void createNewStudy(@Mock MemberService memberService,
                         @Mock StudyRepository studyRepository) {
+        StudyService studyService = new StudyService(memberService, studyRepository);
 
-        Member member = new Member();
-        member.setId(1L);
-        member.setEmail("a@a.com");
+        // given
+        Member member = new Member(1L, "a@a.com");
         // 아래 코드는 MemberService의 findById 메소드가 호출될 때 member를 리턴해라는 stubbing
-        when(memberService.findById(1L)).thenReturn(Optional.of(member));
+        given(memberService.findById(1L)).willReturn(Optional.of(member));
 
         // 아래 코드는 StudyRepository의 save 메소드가 호출될 때 study를 리턴해라는 stubbing
         Study study = new Study(10, "java");
-        when(studyRepository.save(any())).thenReturn(study);
+        given(studyRepository.save(any())).willReturn(study);
 
-        // StudyService createNewStudy 테스트 코드
-        StudyService studyService = new StudyService(memberService, studyRepository);
+
+
+
+        // when
+        // StudyService createNewStudy
         studyService.createNewStudy(1L, study);
+
+        // then
         assertEquals(member.getId(), study.getOwnerId());
-
         // memberService의 notify 메소드가 1번 호출되었는지 검증
-        verify(memberService, times(1)).notify(study);
+        then(memberService).should(times(1)).notify(study);
         // memberService의 validate 메소드가 한번도 호출되지 않았는지 검증
-        verify(memberService, never()).validate(any());
-
+        then(memberService).should(never()).validate(any());
 
     }
 
