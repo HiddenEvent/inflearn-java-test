@@ -2,6 +2,8 @@ package com.whiteship.inflearnjavatest;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.Duration;
 
@@ -21,11 +23,26 @@ class StudyTest {
         assertEquals(10, study.getLimit());
 
     }
-
     @SlowTest
     void create1() {
         System.out.println("create1");
     }
+    @DisplayName("반복 테스트")
+    @RepeatedTest(value = 10, name = "{displayName}, {currentRepetition}/{totalRepetitions}")
+    void repeatTest(RepetitionInfo repetitionInfo){
+        System.out.println("test " + repetitionInfo.getCurrentRepetition() + " / " +
+                repetitionInfo.getTotalRepetitions());
+    }
+
+    @DisplayName("반복 테스트 (동적 데이터)")
+    @ParameterizedTest(name = "{index} {displayName} message 입력 :{0}")
+    @ValueSource(strings = {"테스트를", "동적으로", "추가하여", "테스트."})
+    void repeatTest(String message){
+        // ValueSource 개수 만큼 테스트가 동작한다.
+        System.out.println(message);
+    }
+
+
 
     @BeforeAll
     static void beforeAll() {
