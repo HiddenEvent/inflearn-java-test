@@ -2,6 +2,7 @@ package com.whiteship.inflearnjavatest.study;
 
 import com.whiteship.inflearnjavatest.domain.Member;
 import com.whiteship.inflearnjavatest.domain.Study;
+import com.whiteship.inflearnjavatest.domain.StudyStatus;
 import com.whiteship.inflearnjavatest.member.MemberService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,12 +19,11 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class StudyServiceTest {
-//    @Mock MemberService memberService;
-//    @Mock StudyRepository studyRepository;
+    @Mock MemberService memberService;
+    @Mock StudyRepository studyRepository;
 
     @Test
-    void createNewStudy(@Mock MemberService memberService,
-                        @Mock StudyRepository studyRepository) {
+    void createNewStudy() {
         StudyService studyService = new StudyService(memberService, studyRepository);
 
         // given
@@ -53,6 +53,21 @@ class StudyServiceTest {
 
     @Test
     void openStudy() {
+        //given
+        StudyService studyService = new StudyService(memberService, studyRepository);
+        Study study = new Study(10, "test");
+        assertNull(study.getOpenedDateTime());
+        given(studyRepository.save(study)).willReturn(study);
+
+        //when
+        studyService.openStudy(study);
+
+        //then
+        assertEquals(StudyStatus.OPENED, study.getStatus());
+        assertEquals(study.getOpenedDateTime(), study.getOpenedDateTime());
+
+        // memberService의 notify 메소드가 1번 호출되었는지 검증
+        then(memberService).should(times(1)).notify(study);
     }
 
     @Test
