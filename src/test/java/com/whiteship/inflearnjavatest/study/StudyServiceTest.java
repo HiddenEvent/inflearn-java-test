@@ -6,13 +6,21 @@ import com.whiteship.inflearnjavatest.domain.StudyStatus;
 import com.whiteship.inflearnjavatest.member.MemberService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Optional;
@@ -24,22 +32,35 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.*;
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
+//@ActiveProfiles("test")
+@Testcontainers
 class StudyServiceTest {
+    static Logger LOOGGER = LoggerFactory.getLogger(StudyServiceTest.class);
     @Mock MemberService memberService;
     @Autowired
     StudyRepository studyRepository;
-    // 아래 'PostgreSQLContainer()' is deprecated 해결 방법
-    // https://www.testcontainers.org/test_framework_integration/manual_lifecycle_control/#singleton-containers
-    // private
-
-    static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:13.3")
-            .withDatabaseName("studytest");
+    // DB Contianer 생성 방법
+    @Container
+    static GenericContainer postgreSQLContainer = new GenericContainer("postgres:13")
+            .withExposedPorts(5432)
+            .withEnv("POSTGRES_DB", "studytest");
+//            .waitingFor(Wait.forLogMessage(".*database system is ready to accept connections.*", 2));
     @BeforeAll
     static void beforeAll() {
-        postgreSQLContainer.start();
-        System.out.println(postgreSQLContainer.getJdbcUrl());
-        System.out.println(postgreSQLContainer.getUsername());
-        System.out.println(postgreSQLContainer.getPassword());
+        Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(LOOGGER);
+        postgreSQLContainer.followOutput(logConsumer);
+//        postgreSQLContainer.start();
+//        System.out.println(postgreSQLContainer.getJdbcUrl());
+//        System.out.println(postgreSQLContainer.getUsername());
+//        System.out.println(postgreSQLContainer.getPassword());
+    }
+
+    @BeforeEach
+    void beforeEach() {
+        System.out.println("============= beforeEach");
+        System.out.println(postgreSQLContainer.getMappedPort(5432)); // 5432에 매핑된 포트를 가져온다.
+        System.out.println(postgreSQLContainer.getLogs());
+        studyRepository.deleteAll();
     }
     @AfterAll
     static void afterAll() {
