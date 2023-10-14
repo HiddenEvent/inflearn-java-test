@@ -4,6 +4,7 @@ import com.whiteship.inflearnjavatest.domain.Member;
 import com.whiteship.inflearnjavatest.domain.Study;
 import com.whiteship.inflearnjavatest.domain.StudyStatus;
 import com.whiteship.inflearnjavatest.member.MemberService;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,37 +18,38 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
-//@ActiveProfiles("test")
+@ActiveProfiles("test")
 @Testcontainers
+@Slf4j
 class StudyServiceTest {
-    static Logger LOOGGER = LoggerFactory.getLogger(StudyServiceTest.class);
     @Mock MemberService memberService;
     @Autowired
     StudyRepository studyRepository;
     // DB Contianer 생성 방법
     @Container
-    static GenericContainer postgreSQLContainer = new GenericContainer("postgres:13")
+    static GenericContainer postgreSQLContainer = new GenericContainer("postgres:13.3")
             .withExposedPorts(5432)
-            .withEnv("POSTGRES_DB", "studytest");
+            .withEnv("POSTGRES_DB", "studytest")
+            .withEnv("POSTGRES_HOST_AUTH_METHOD", "trust");
 //            .waitingFor(Wait.forLogMessage(".*database system is ready to accept connections.*", 2));
     @BeforeAll
     static void beforeAll() {
-        Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(LOOGGER);
+        Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(log);
         postgreSQLContainer.followOutput(logConsumer);
 //        postgreSQLContainer.start();
 //        System.out.println(postgreSQLContainer.getJdbcUrl());
