@@ -13,8 +13,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
@@ -29,22 +35,29 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
+
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
 @Testcontainers
 @Slf4j
+@ContextConfiguration(initializers = StudyServiceTest.ContainerPropertyInitializer.class)
 class StudyServiceTest {
-    @Mock MemberService memberService;
+    @Mock
+    MemberService memberService;
     @Autowired
     StudyRepository studyRepository;
+    @Value("${container.port}")
+    int port;
+
     // DB Contianer 생성 방법
     @Container
     static GenericContainer postgreSQLContainer = new GenericContainer("postgres:13.3")
             .withExposedPorts(5432)
             .withEnv("POSTGRES_DB", "studytest")
             .withEnv("POSTGRES_HOST_AUTH_METHOD", "trust");
-//            .waitingFor(Wait.forLogMessage(".*database system is ready to accept connections.*", 2));
+
+    //            .waitingFor(Wait.forLogMessage(".*database system is ready to accept connections.*", 2));
     @BeforeAll
     static void beforeAll() {
         Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(log);
@@ -58,9 +71,12 @@ class StudyServiceTest {
     @BeforeEach
     void beforeEach() {
         System.out.println("============= beforeEach");
-        System.out.println(postgreSQLContainer.getMappedPort(5432)); // 5432에 매핑된 포트를 가져온다.
+        System.out.println(port);
+//        System.out.println(postgreSQLContainer.getMappedPort(5432)); // 5432에 매핑된 포트를 가져온다.
+
         studyRepository.deleteAll();
     }
+
     @AfterAll
     static void afterAll() {
         postgreSQLContainer.stop();
@@ -78,8 +94,6 @@ class StudyServiceTest {
         // 아래 코드는 StudyRepository의 save 메소드가 호출될 때 study를 리턴해라는 stubbing
         Study study = new Study(10, "java");
 //        given(studyRepository.save(any())).willReturn(study);
-
-
 
 
         // when
@@ -111,5 +125,17 @@ class StudyServiceTest {
 
         // memberService의 notify 메소드가 1번 호출되었는지 검증
         then(memberService).should(times(1)).notify(study);
+    }
+
+    // TestContainers, 컨테이너 정보를 스프링 테스트에서 사용할 수 있게 해주는 설정
+    static class ContainerPropertyInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+        @Override
+        public void initialize(ConfigurableApplicationContext applicationContext) {
+            System.out.println("============== initialize");
+            TestPropertyValues.of(
+                    "container.port=" + postgreSQLContainer.getMappedPort(5432)
+            ).applyTo(applicationContext.getEnvironment());
+
+        }
     }
 }
