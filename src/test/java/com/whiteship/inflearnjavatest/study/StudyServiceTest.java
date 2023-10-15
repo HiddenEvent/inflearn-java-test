@@ -5,9 +5,6 @@ import com.whiteship.inflearnjavatest.domain.Study;
 import com.whiteship.inflearnjavatest.domain.StudyStatus;
 import com.whiteship.inflearnjavatest.member.MemberService;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -18,14 +15,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.env.Environment;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.io.File;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -52,41 +48,17 @@ class StudyServiceTest {
 
     // DB Contianer 생성 방법
     @Container
-    static GenericContainer postgreSQLContainer = new GenericContainer("postgres:13.3")
-            .withExposedPorts(5432)
-            .withEnv("POSTGRES_DB", "studytest")
-            .withEnv("POSTGRES_HOST_AUTH_METHOD", "trust");
-
-    //            .waitingFor(Wait.forLogMessage(".*database system is ready to accept connections.*", 2));
-    @BeforeAll
-    static void beforeAll() {
-        Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(log);
-        postgreSQLContainer.followOutput(logConsumer); //container의 로그를 출력한다.
-//        postgreSQLContainer.start();
-//        System.out.println(postgreSQLContainer.getJdbcUrl());
-//        System.out.println(postgreSQLContainer.getUsername());
-//        System.out.println(postgreSQLContainer.getPassword());
-    }
-
-    @BeforeEach
-    void beforeEach() {
-        System.out.println("============= beforeEach");
-        System.out.println(port);
-//        System.out.println(postgreSQLContainer.getMappedPort(5432)); // 5432에 매핑된 포트를 가져온다.
-
-        studyRepository.deleteAll();
-    }
-
-    @AfterAll
-    static void afterAll() {
-        postgreSQLContainer.stop();
-    }
+    static DockerComposeContainer composeContainer = new DockerComposeContainer(
+            new File("src/test/resources/docker-compose.yml"))
+            .withExposedService("study-db", 5432)
+            ;
 
     @Test
     void createNewStudy() {
-        StudyService studyService = new StudyService(memberService, studyRepository);
+        log.info("============== docker-compose port : {}", port);
 
         // given
+        StudyService studyService = new StudyService(memberService, studyRepository);
         Member member = new Member(1L, "a@a.com");
         // 아래 코드는 MemberService의 findById 메소드가 호출될 때 member를 리턴해라는 stubbing
         given(memberService.findById(1L)).willReturn(Optional.of(member));
@@ -111,6 +83,7 @@ class StudyServiceTest {
 
     @Test
     void openStudy() {
+        log.info("============== docker-compose port : {}", port);
         //given
         StudyService studyService = new StudyService(memberService, studyRepository);
         Study study = new Study(10, "test");
@@ -133,7 +106,7 @@ class StudyServiceTest {
         public void initialize(ConfigurableApplicationContext applicationContext) {
             System.out.println("============== initialize");
             TestPropertyValues.of(
-                    "container.port=" + postgreSQLContainer.getMappedPort(5432)
+                    "container.port=" + composeContainer.getServicePort("study-db", 5432) // docker-compose 설정한 컨테이너의 포트를 가져온다.
             ).applyTo(applicationContext.getEnvironment());
 
         }
