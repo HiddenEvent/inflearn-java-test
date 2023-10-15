@@ -12,8 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -50,7 +48,7 @@ class StudyServiceTest {
     @BeforeAll
     static void beforeAll() {
         Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(log);
-        postgreSQLContainer.followOutput(logConsumer);
+        postgreSQLContainer.followOutput(logConsumer); //container의 로그를 출력한다.
 //        postgreSQLContainer.start();
 //        System.out.println(postgreSQLContainer.getJdbcUrl());
 //        System.out.println(postgreSQLContainer.getUsername());
@@ -61,7 +59,6 @@ class StudyServiceTest {
     void beforeEach() {
         System.out.println("============= beforeEach");
         System.out.println(postgreSQLContainer.getMappedPort(5432)); // 5432에 매핑된 포트를 가져온다.
-        System.out.println(postgreSQLContainer.getLogs());
         studyRepository.deleteAll();
     }
     @AfterAll
